@@ -492,38 +492,6 @@ namespace ResumeBuilder
                         AddParagraph(body, cert.Trim(), false, "24");
                     }
                 }
-                 FooterPart footerPart = mainPart.AddNewPart<FooterPart>();
-        string footerPartId = mainPart.GetIdOfPart(footerPart);
-              Footer footer = new Footer(
-            new Paragraph(
-                new ParagraphProperties(
-                    new ParagraphBorders(
-                        new TopBorder { Val = BorderValues.Single, Size = 24, Space = 1, Color = "000000" }
-                    )
-                ),
-                new Run(
-                    new RunProperties(
-                        new FontSize { Val = "24" },
-                        new RunFonts { Ascii = "Copperplate Gothic Std 29 AB" }
-                    ),
-                    new Text("COSQ NETWORK PVT LTD")
-                ),
-                new Run(
-                    new RunProperties(
-                        new FontSize { Val = "24" },
-                        new RunFonts { Ascii = "OpenSans" }
-                    ),
-                    new TabChar(),
-                    new Text("1")
-                )
-            )
-        );
-         footerPart.Footer = footer;
-
-        SectionProperties sectionProps = new SectionProperties();
-        FooterReference footerReference = new FooterReference { Type = HeaderFooterValues.Default, Id = footerPartId };
-        sectionProps.AppendChild(footerReference);
-        body.AppendChild(sectionProps);
 
 
             }
