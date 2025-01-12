@@ -1,21 +1,22 @@
-
+using System;
+using System.Drawing;
+using System.Windows.Forms;
 using System.Drawing.Text;
 
 namespace ResumeBuilder
 {
-    public partial class Form1 : Form
+    public partial class Form1 : Form
     {
-        private Panel pagePanel;
         private Panel previewPanel;
-        private Panel headerLine;
-        private Panel footerLine;
-        private Label pageNumber;
-        private Label COSQ;
+        private const float FooterPositionRatio = 0.95f;
+
         public Form1()
-    {
-        InitializeComponent();
-        SetupPanels();
-    }
+        {
+            InitializeComponent();
+            SetupPanels();
+            this.Resize += Form1_Resize;
+            this.AutoScroll = true;
+        }
 
         private void SetupPanels()
         {
@@ -23,99 +24,83 @@ namespace ResumeBuilder
             this.BackColor = Color.Gray;
             int a4Width = 794;
             int a4Height = 1123;
+            this.MinimumSize = new Size(800, 600);
+            this.AutoScrollMinSize = new Size(1600, 1200);
 
-            pagePanel = new Panel()
-            {
-                Size = new Size(a4Width, a4Height),
-                Location= new Point(20,20),
-                BackColor = Color.White,
-                AutoScroll = true,
-                AutoScrollMinSize = new Size(0, a4Height + 50)
-            };
             previewPanel = new Panel()
             {
                 Size = new Size(a4Width, a4Height),
-                Location = new Point(a4Width + 40, 20),
+                Location = new Point(this.Width - a4Width - 40, 20),
                 BackColor = Color.White,
                 AutoScroll = true,
-                AutoScrollMinSize = new Size(0, a4Height + 50)
+                AutoScrollMinSize = new Size(a4Width, a4Height + 200)
             };
-            headerLine = new Panel()
-            {
-                Size = new Size(a4Width - 80, 7),
-                Location = new Point(40, 10),
-                BackColor = Color.Black
-            };
-            var previewHeaderLine = new Panel()
-            {
-                Size = new Size(a4Width - 80, 7),
-                Location = new Point(40, 10),
-                BackColor = Color.Black
-            };
-            footerLine = new Panel()
-            {
-                Size = new Size(a4Width - 80, 7),
-                Location = new Point(40, (int)(a4Height * 0.82)), 
-                BackColor = Color.Black
-            };
-            var previewFooterLine  = new Panel()
-            {
-                Size = new Size(a4Width - 80, 7),
-                Location = new Point(40, (int)(a4Height * 0.82)), 
-                BackColor = Color.Black
-            };
+
+            SetupPanelContents(previewPanel, a4Width, a4Height);
+            this.Controls.Add(previewPanel);
+            UpdateLayout();
+        }
+
+        private void SetupPanelContents(Panel panel, int width, int height)
+        {
             PrivateFontCollection pfc = new PrivateFontCollection();
             pfc.AddFontFile("C:/Users/Aswin/Desktop/F-projects/ASP.NET/ResumeBuilder/ResumeBuilder/Fonts/OpenSans-VariableFont_wdth,wght.ttf");
             pfc.AddFontFile("C:/Users/Aswin/Desktop/F-projects/ASP.NET/ResumeBuilder/ResumeBuilder/Fonts/Copperplate Gothic Std 29 AB/Copperplate Gothic Std 29 AB.otf");
-            COSQ = new Label()
+
+            var headerLine = new Panel()
+            {
+                Size = new Size(width - 80, 7),
+                Location = new Point(40, 10),
+                BackColor = Color.Black
+            };
+
+            var footerLine = new Panel()
+            {
+                Size = new Size(width - 80, 7),
+                BackColor = Color.Black
+            };
+
+            var cosq = new Label()
             {
                 Text = "COSQ NETWORK PVT LTD",
                 Font = new Font(pfc.Families[1], 12, FontStyle.Regular),
-                Location = new Point(40, (int)(a4Height * 0.85)),
                 AutoSize = true
             };
-            var previewCOSQ = new Label
-        {
-            Text = "COSQ NETWORK PVT LTD",
-            Location = new Point(40, (int)(a4Height * 0.85)),
-            AutoSize = true,
-            Font = new Font(pfc.Families[1], 12, FontStyle.Regular)
-        };
-            pageNumber = new Label()
-            {
-                Text="1",
-                Location = new Point(a4Width - 60, (int)(a4Height * 0.85)),
-                AutoSize= true,
-                Font = new Font(pfc.Families[0], 12, FontStyle.Bold)
-            };
-            var previewPageNumber = new Label
+
+            var pageNumber = new Label()
             {
                 Text = "1",
-                Location = new Point(a4Width - 60, (int)(a4Height * 0.85)),
                 AutoSize = true,
                 Font = new Font(pfc.Families[0], 12, FontStyle.Bold)
             };
-                // Add controls to the editing panel
-            pagePanel.Controls.Add(headerLine);
-            pagePanel.Controls.Add(footerLine);
-            pagePanel.Controls.Add(COSQ);
-            pagePanel.Controls.Add(pageNumber);
 
-            // Add controls to the preview panel
-            previewPanel.Controls.Add(previewHeaderLine);
-            previewPanel.Controls.Add(previewFooterLine);
-            previewPanel.Controls.Add(previewCOSQ);
-            previewPanel.Controls.Add(previewPageNumber);
+            panel.Controls.Add(headerLine);
+            panel.Controls.Add(footerLine);
+            panel.Controls.Add(cosq);
+            panel.Controls.Add(pageNumber);
 
-            // Add both panels to the form
-            this.Controls.Add(pagePanel);
-            this.Controls.Add(previewPanel);
+            panel.Tag = new { FooterLine = footerLine, COSQ = cosq, PageNumber = pageNumber };
+        }
 
+        private void UpdateLayout()
+        {
+            UpdatePanelLayout(previewPanel);
+        }
+
+        private void UpdatePanelLayout(Panel panel)
+        {
+            var footerElements = (dynamic)panel.Tag;
+            int panelHeight = panel.ClientSize.Height;
+            int footerY = (int)(panelHeight * FooterPositionRatio);
+
+            footerElements.FooterLine.Location = new Point(40, footerY);
+            footerElements.COSQ.Location = new Point(40, footerY + 15);
+            footerElements.PageNumber.Location = new Point(panel.ClientSize.Width - 60, footerY + 15);
+        }
+
+        private void Form1_Resize(object sender, EventArgs e)
+        {
+            UpdateLayout();
         }
     }
-    
 }
-
-
-
-
