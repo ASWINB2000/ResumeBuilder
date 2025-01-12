@@ -33,7 +33,8 @@ namespace ResumeBuilder
         private RichTextBox previewBox;
         private StatusStrip statusStrip;
 
-
+        int a4Width = 794;  // 210mm
+        int a4Height = 1123;
         public Form1()
         {
             InitializeComponent();
@@ -61,10 +62,10 @@ namespace ResumeBuilder
             Panel previewPanel = new Panel
             {
                 Location = new Point(590, 20),
-                Size = new Size(550, 700),
-                BorderStyle = BorderStyle.None,
+                Size = new Size(a4Width + 20, a4Height + 20), // Add small margin
+                BorderStyle = BorderStyle.FixedSingle,
                 BackColor = Color.White,
-                Padding = new Padding(20)
+                Padding = new Padding(10)
             };
 
             int currentY = 10;
@@ -174,13 +175,15 @@ namespace ResumeBuilder
             previewBox = new RichTextBox
             {
                 Location = new Point(10, 10),
-                Size = new Size(530, 680),
+                Size = new Size(a4Width - 20, a4Height - 20), // Account for padding
                 ReadOnly = true,
                 BackColor = Color.White,
                 BorderStyle = BorderStyle.None,
                 Font = new Font("Segoe UI", 10f),
-                Padding = new Padding(10)
+                Padding = new Padding(40, 10, 40, 10),
+                ScrollBars = RichTextBoxScrollBars.Vertical
             };
+
             inputPanel.Controls.Add(lblProfilePic);
             inputPanel.Controls.Add(profilePicture);
             inputPanel.Controls.Add(btnSelectImage);
@@ -308,7 +311,8 @@ namespace ResumeBuilder
         private void UpdatePreview(object sender, EventArgs e)
         {
             previewBox.Clear();
-
+            previewBox.SelectionFont = new Font("Arial", 12, FontStyle.Bold);
+            previewBox.AppendText("_________________________________________________\n\n");
             // Name
             previewBox.SelectionFont = new Font("Arial", 18, FontStyle.Bold);
             previewBox.AppendText($"{txtName.Text.ToUpper()}\n\n");
@@ -412,6 +416,15 @@ namespace ResumeBuilder
                     previewBox.AppendText($"{cert.Trim()}\n");
                 }
             }
+            previewBox.SelectionFont = new Font("Arial", 12, FontStyle.Bold);
+            previewBox.AppendText("\n_________________________________________________\n\n");
+
+            previewBox.SelectionFont = new Font("Copperplate Gothic Std", 12, FontStyle.Regular);
+            previewBox.AppendText("COSQ NETWORK PVT LTD");
+            previewBox.SelectionAlignment = HorizontalAlignment.Right;
+            previewBox.SelectionFont = new Font("Arial", 12, FontStyle.Bold);
+            previewBox.AppendText("1");
+
         }
         private void BtnGenerate_Click(object sender, EventArgs e)
         {
@@ -462,6 +475,16 @@ namespace ResumeBuilder
                 MainDocumentPart mainPart = doc.AddMainDocumentPart();
                 mainPart.Document = new Document(new Body());
                 Body body = mainPart.Document.Body;
+                Paragraph headerLinePara = body.AppendChild(new Paragraph());
+                Run headerLineRun = headerLinePara.AppendChild(new Run());
+                headerLineRun.AppendChild(new Break { Type = BreakValues.TextWrapping });
+                headerLinePara.AppendChild(
+                    new ParagraphProperties(
+                        new ParagraphBorders(
+                            new TopBorder { Val = BorderValues.Single, Size = 24, Space = 1, Color = "000000" }
+                        )
+                    )
+                );
 
                 // Name (Large, Bold)
                 AddParagraph(body, txtName.Text.ToUpper(), true, "36", JustificationValues.Left);
@@ -626,9 +649,34 @@ namespace ResumeBuilder
                         AddParagraph(body, cert.Trim(), false, "24");
                     }
                 }
+                Paragraph footerPara = body.AppendChild(new Paragraph(
+           new ParagraphProperties(
+               new ParagraphBorders(
+                   new BottomBorder { Val = BorderValues.Single, Size = 24, Space = 1, Color = "000000" }
+               )
+           )
+       ));
+
+                Run footerRun = footerPara.AppendChild(new Run());
+                footerRun.AppendChild(new Break { Type = BreakValues.TextWrapping });
+
+                // Add COSQ text and page number
+                Paragraph cosqPara = body.AppendChild(new Paragraph(
+                    new Run(
+                        new RunProperties(new FontSize { Val = "24" }),
+                        new Text("COSQ NETWORK PVT LTD")
+                    ),
+                    new Run(
+                        new RunProperties(new FontSize { Val = "24" }),
+                        new Text("1") { Space = SpaceProcessingModeValues.Preserve }
+                    )
+                ));
+
+                cosqPara.ParagraphProperties = new ParagraphProperties(
+                    new Justification { Val = JustificationValues.Left }
+                );
             }
         }
-
     }
 }
 
