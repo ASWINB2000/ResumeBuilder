@@ -9,6 +9,7 @@ namespace ResumeBuilder
     {
         private Panel previewPanel;
         private const float FooterPositionRatio = 0.95f;
+        private ResumeData resumeData;
 
         public Form1()
         {
@@ -20,26 +21,56 @@ namespace ResumeBuilder
 
         private void SetupPanels()
         {
-            this.Size = new Size(1600, 1200);
+            this.Size = new Size(1600, 100);
             this.BackColor = Color.Gray;
             int a4Width = 794;
             int a4Height = 1123;
+            int spacing = 50; // Increased spacing between panels
+int leftMargin = 20;
             this.MinimumSize = new Size(800, 600);
             this.AutoScrollMinSize = new Size(1600, 1200);
 
-            previewPanel = new Panel()
+            // Input Panel for ResumeData
+            Panel dataContainer = new Panel
             {
                 Size = new Size(a4Width, a4Height),
-                Location = new Point(this.Width - a4Width - 40, 20),
+                Location = new Point(leftMargin, 20),
                 BackColor = Color.White,
                 AutoScroll = true,
                 AutoScrollMinSize = new Size(a4Width, a4Height + 200)
             };
 
+            previewPanel = new Panel()
+            {
+                Size = new Size(a4Width, a4Height),
+                Location = new Point(leftMargin + a4Width + spacing, 20),
+                BackColor = Color.White,
+                AutoScroll = true,
+                AutoScrollMinSize = new Size(a4Width, a4Height + 200)
+            };
+
+            RichTextBox previewBox = new RichTextBox
+            {
+                Location = new Point(10, 50),
+                Size = new Size(previewPanel.Width - 20, previewPanel.Height - 150),
+                ReadOnly = true,
+                BackColor = Color.White,
+                BorderStyle = BorderStyle.None,
+                Font = new Font("Segoe UI", 10f)
+            };
+            this.Size = new Size(1600, 1200);
+            
+
+            previewPanel.Controls.Add(previewBox);
+            resumeData = new ResumeData(dataContainer, previewBox);
+
             SetupPanelContents(previewPanel, a4Width, a4Height);
+
+            this.Controls.Add(dataContainer);
             this.Controls.Add(previewPanel);
             UpdateLayout();
-        }
+            }
+
 
         private void SetupPanelContents(Panel panel, int width, int height)
         {
@@ -87,16 +118,21 @@ namespace ResumeBuilder
             UpdatePanelLayout(previewPanel);
         }
 
-        private void UpdatePanelLayout(Panel panel)
-        {
-            var footerElements = (dynamic)panel.Tag;
-            int panelHeight = panel.ClientSize.Height;
-            int footerY = (int)(panelHeight * FooterPositionRatio);
+    private void UpdatePanelLayout(Panel panel)
+{
+    var footerElements = (dynamic)panel.Tag;
+    int panelHeight = panel.ClientSize.Height;
+    int footerY = panelHeight - 100; // Fixed position from bottom instead of using ratio
 
-            footerElements.FooterLine.Location = new Point(40, footerY);
-            footerElements.COSQ.Location = new Point(40, footerY + 15);
-            footerElements.PageNumber.Location = new Point(panel.ClientSize.Width - 60, footerY + 15);
-        }
+    footerElements.FooterLine.Location = new Point(40, footerY);
+    footerElements.COSQ.Location = new Point(40, footerY + 15);
+    footerElements.PageNumber.Location = new Point(panel.ClientSize.Width - 60, footerY + 15);
+
+    // Ensure footer elements are brought to front
+    footerElements.FooterLine.BringToFront();
+    footerElements.COSQ.BringToFront();
+    footerElements.PageNumber.BringToFront();
+}
 
         private void Form1_Resize(object sender, EventArgs e)
         {
